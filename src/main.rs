@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 22:36:19 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/04 10:15:05 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/04 18:29:04 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,18 +39,72 @@ fn parse_argument() -> String {
 }
 
 
+fn character_position(string: &str, character: char) -> usize {
+
+    // Return the position of the character in the string
+    // If the character is not found, an error is raised
+    // If the character is found multiple times, an error is raised
+    // If the character is at the beginning or the end of the string, an error is raised
+
+    let bytes = string.as_bytes();
+    let mut position: usize = 0;
+    let mut count: usize = 0;
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == character as u8 {
+            count += 1;
+            position = i;
+            if count > 1 {
+                error("Error: Invalid equation, multiple '=' signs");
+            }
+        }
+    }
+
+    if count == 0 {
+        error("Error: Invalid equation, no '=' sign");
+    } else if position == 0 || position == string.len() - 1 {
+        error("Error: Invalid equation, '=' sign at the beginning or the end of the equation");
+    }
+    position
+
+}
+
+
 fn split_equation(equation: &String) -> (&str, &str) {
 
     // Split the polynomial equation by the '='
     // The right side will be multiplied by -1
 
-    let sides: Vec<&str> = equation.split('=').collect();
-    if sides.len() != 2 {
-        error("Error: Equation must contain an '=' sign");
-    }
-    let left_side = sides[0].trim();
-    let right_side = sides[1].trim();
+    let equal_position = character_position(equation, '=');
+
+    let left_side = &equation[..equal_position];
+    let right_side = &equation[equal_position + 1..];
+
     (left_side, right_side)
+
+}
+
+
+struct Term {
+    coefficient: f64,
+    degree: i32
+}
+
+
+impl Term {
+
+    fn new(coefficient: f64, degree: i32) -> Term {
+        Term { coefficient, degree }
+    }
+
+    fn get_value(&self) -> f64 {
+        self.coefficient
+    }
+
+    fn _print(&self) {
+        println!("{} * X^{}", self.coefficient, self.degree);
+    }
+
 }
 
 
@@ -62,6 +116,7 @@ fn is_a_sign(string: &str) -> bool {
         return true;
     }
     return false;
+
 }
 
 
@@ -125,31 +180,41 @@ fn parse_degree(string: &str) -> i32 {
 
 
 fn insert_coefficient(
-    coefficients: &mut BTreeMap<i32, f64>,
+    terms: &mut BTreeMap<i32, Term>,
     degree: &mut i32,
     coefficient: &mut f64,
     sign: &mut f64,
     side_sign: f64
 ) {
 
-    // Ajouter le coefficient à la liste
+    // Insert the Term in the BTreeMap
 
-    let mut coefficient = *coefficient * side_sign * *sign;
-    if coefficients.contains_key(&degree) {
-        let current_coefficient = coefficients.get(&degree).unwrap();
-        coefficient += current_coefficient;
+    if terms.contains_key(&degree) {
+
+        let previous_term = terms.get(&degree).unwrap();
+
+        let new_coefficient = previous_term.coefficient + *coefficient * *sign * side_sign;
+        let new_term = Term::new(new_coefficient, *degree);
+
+        terms.insert(*degree, new_term);
     }
-    coefficients.insert(*degree, coefficient);
+    else {
+
+        let term = Term::new(*coefficient * *sign * side_sign, *degree);
+        terms.insert(*degree, term);
+
+    }
+
 }
 
 
-fn store_coefficients(side: &str, side_sign: f64, coefficients: &mut BTreeMap<i32, f64>) {
+fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) {
 
     // Retrieve the sign, the coefficient and the degree of each polynomial part of an equation
     // Insert them in a BTreeMap
 
     let mut sign = 1.0;
-    let mut coefficient = 1.0;
+    let mut coefficient = 0.0;
     let mut degree;
 
     let side_splitted = side.split_whitespace();
@@ -157,7 +222,9 @@ fn store_coefficients(side: &str, side_sign: f64, coefficients: &mut BTreeMap<i3
     let mut i = 0;
 
     while i < nb_terms {
+
         let term = side.split_whitespace().nth(i).unwrap();
+
         if is_a_sign(term) {
             sign = if term == "+" { 1.0 } else { -1.0 };
             i += 1;
@@ -166,9 +233,10 @@ fn store_coefficients(side: &str, side_sign: f64, coefficients: &mut BTreeMap<i3
             coefficient = term.parse::<f64>().unwrap();
             // If there is no term or the next term is a sign, the degree is 0
             if i + 1 == nb_terms || is_a_sign(side.split_whitespace().nth(i + 1).unwrap()) {
+                print!("HERE coefficient: {coefficient}// ");
                 degree = 0;
-                insert_coefficient(coefficients, &mut degree, &mut coefficient, &mut sign, side_sign);
-                coefficient = 1.0;
+                insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign);
+                coefficient = 0.0;
                 sign = 1.0;
             }
             i += 1;
@@ -178,8 +246,8 @@ fn store_coefficients(side: &str, side_sign: f64, coefficients: &mut BTreeMap<i3
             continue;
         } else if contains(term, 'X') {
             degree = parse_degree(term);
-            insert_coefficient(coefficients, &mut degree, &mut coefficient, &mut sign, side_sign);
-            coefficient = 1.0;
+            insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign);
+            coefficient = 0.0;
             sign = 1.0;
         } else {
             error("Error: Invalid term {term}");
@@ -189,7 +257,7 @@ fn store_coefficients(side: &str, side_sign: f64, coefficients: &mut BTreeMap<i3
 }
 
 
-fn print_reduced_form(coefficients: &BTreeMap<i32, f64>) {
+fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
 
     // Print the reduced form of the equation
 
@@ -198,8 +266,8 @@ fn print_reduced_form(coefficients: &BTreeMap<i32, f64>) {
 
     // Check if the reduced equation is 0 = 0
     let mut all_zero = true;
-    for value in coefficients.values() {
-        if *value != 0.0 {
+    for value in terms.values() {
+        if value.coefficient != 0.0 {
             all_zero = false;
             break
         }
@@ -212,32 +280,33 @@ fn print_reduced_form(coefficients: &BTreeMap<i32, f64>) {
 
     let mut first_term = true;
 
-    for (degree, coefficient) in coefficients.iter().rev() {
+    for (degree, term) in terms.iter() {
 
         // Skip the terms with a coefficient of 0
-        if *coefficient == 0.0 {
+        if term.coefficient == 0.0 {
             continue;
         }
 
         // Print the sign
         if first_term == false {
-            if *coefficient > 0.0 {
+            if term.coefficient > 0.0 {
                 print!(" + ");
             } else {
                 print!(" - ");
             }
-        } else if *coefficient < 0.0 {
+        } else if term.coefficient < 0.0 {
             print!("-");
         }
 
-        // Print the coefficient (if different from 1 or 0)
-        let abs_coefficient = coefficient.abs();
-        if abs_coefficient != 1.0 {
-            print!("{} ", abs_coefficient);
-        }
+        // Print the coefficient (if different from 1)
+        let abs_coefficient = term.coefficient.abs();
+            if term.degree == 0 {
+                print!("{}", abs_coefficient);
+            } else if abs_coefficient != 1.0 {
+                print!("{} ", abs_coefficient);
+            }
 
         // Print the degree
-
         if *degree != 0 {
             if abs_coefficient != 1.0 {
                 print!("* ")
@@ -251,13 +320,13 @@ fn print_reduced_form(coefficients: &BTreeMap<i32, f64>) {
 }
 
 
-fn print_polynomial_degree(coefficients: &BTreeMap<i32, f64>, polynomial_degree: &mut i32) {
+fn print_polynomial_degree(terms: &BTreeMap<i32, Term>, polynomial_degree: &mut i32) {
 
     // Set and print the polynomial degree
     // Also check if the degree is >= 0 and < 3
 
-    for (degree, coefficient) in coefficients.iter() {
-        if *coefficient != 0.0 {
+    for (degree, term) in terms.iter() {
+        if term.coefficient != 0.0 {
             *polynomial_degree = *degree;
         }
     }
@@ -280,9 +349,15 @@ fn check_polynomial_degree(polynomial_degree: i32) {
 }
 
 
-fn resolve_degree_0(coefficients: &BTreeMap<i32, f64>) {
+fn resolve_degree_0(terms: &BTreeMap<i32, Term>) {
 
-    if coefficients.contains_key(&0) && *coefficients.get(&0).unwrap() == 0.0 {
+    // Equation of the form: c*x^0 = 0
+    // If c = 0, all real numbers are solutions
+    // If c != 0, no solution
+
+    let c = if terms.contains_key(&0) { terms.get(&0).unwrap().get_value() } else { 0.0 };
+
+    if c == 0.0 {
         println!("All real numbers are solutions");
     } else {
         println!("No solution");
@@ -291,19 +366,27 @@ fn resolve_degree_0(coefficients: &BTreeMap<i32, f64>) {
 }
 
 
-fn resolve_degree_1(coefficients: &BTreeMap<i32, f64>) {
+fn resolve_degree_1(terms: &BTreeMap<i32, Term>) {
 
-    let solution = -coefficients.get(&0).unwrap() / coefficients.get(&1).unwrap();
+    // Equation of the form: b*x^1 + c*x^0 = 0
+    // The solution is -c / b
+
+    let b = if terms.contains_key(&1) { terms.get(&1).unwrap().get_value() } else { 0.0 };
+    let c = if terms.contains_key(&0) { terms.get(&0).unwrap().get_value() } else { 0.0 };
+
+    let solution = -c / b;
     println!("The solution is: {solution}");
 
 }
 
 
-fn resolve_degree_2(coefficients: &BTreeMap<i32, f64>) {
+fn resolve_degree_2(terms: &BTreeMap<i32, Term>) {
 
-    let a = if coefficients.contains_key(&2) { *coefficients.get(&2).unwrap() } else { 0.0 };
-    let b = if coefficients.contains_key(&1) { *coefficients.get(&1).unwrap() } else { 0.0 };
-    let c = if coefficients.contains_key(&0) { *coefficients.get(&0).unwrap() } else { 0.0 };
+    // Equation of the form: a*x^2 + b*x^1 + c*x^0 = 0
+    
+    let a = if terms.contains_key(&2) { terms.get(&2).unwrap().get_value() } else { 0.0 };
+    let b = if terms.contains_key(&1) { terms.get(&1).unwrap().get_value() } else { 0.0 };
+    let c = if terms.contains_key(&0) { terms.get(&0).unwrap().get_value() } else { 0.0 };
 
     let discriminant = b.powi(2) - 4.0 * a * c;
 
@@ -328,19 +411,19 @@ fn main() {
 
     let equation: String = parse_argument();
     let (left_side, right_side) = split_equation(&equation);
-    let mut coefficients: BTreeMap<i32, f64> = BTreeMap::new();
+    let mut terms: BTreeMap<i32, Term> = BTreeMap::new();
     let mut polynomial_degree = 0;
 
-    store_coefficients(left_side, 1.0, &mut coefficients);
-    store_coefficients(right_side, -1.0, &mut coefficients);
+    store_terms(left_side, 1.0, &mut terms);
+    store_terms(right_side, -1.0, &mut terms);
 
-    print_reduced_form(&coefficients);
-    print_polynomial_degree(&coefficients, &mut polynomial_degree);
+    print_reduced_form(&terms);
+    print_polynomial_degree(&terms, &mut polynomial_degree);
 
     match polynomial_degree {
-        0 => resolve_degree_0(&coefficients),
-        1 => resolve_degree_1(&coefficients),
-        2 => resolve_degree_2(&coefficients),
+        0 => resolve_degree_0(&terms),
+        1 => resolve_degree_1(&terms),
+        2 => resolve_degree_2(&terms),
         _ => println!("Polynomial degree: {polynomial_degree}")
     }
 
