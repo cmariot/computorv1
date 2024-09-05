@@ -21,12 +21,8 @@ pub fn exponent(nb: i32) -> String {
     if is_negative {
         copy *= -1;
     }
-    
-    if copy == 0 {
-        exponent.push('⁰')
-    }
 
-    while copy > 0 {
+    loop {
 
         let digit = copy % 10;
         copy /= 10;
@@ -42,8 +38,10 @@ pub fn exponent(nb: i32) -> String {
             7 => exponent.push('⁷'),
             8 => exponent.push('⁸'),
             9 => exponent.push('⁹'),
-            _ => {print!("Error")},
-
+            _ => {print!("Error")}
+        }
+        if copy == 0 {
+            break;
         }
     }
 
