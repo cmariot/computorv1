@@ -6,15 +6,19 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:09:12 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 08:56:37 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/05 15:59:19 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+use crate::color;
 use crate::error;
 use crate::Term;
 use std::collections::BTreeMap;
 
+
 fn check_polynomial_degree(polynomial_degree: i32) {
+
     // Check if the polynomial degree is valid (between 0 and 2)
 
     if polynomial_degree < 0 {
@@ -22,9 +26,11 @@ fn check_polynomial_degree(polynomial_degree: i32) {
     } else if polynomial_degree > 2 {
         error("The polynomial degree is stricly greater than 2, I can't solve.");
     }
+
 }
 
 pub fn print_polynomial_degree(terms: &BTreeMap<i32, Term>, polynomial_degree: &mut i32) {
+
     // Set and print the polynomial degree
     // The polynomial degree is the highest degree of the terms in the equation
     // Example : 3 * X^2 + 1 * X^1 + 1 * X^0 = 0 -> Polynomial degree: 2
@@ -36,7 +42,9 @@ pub fn print_polynomial_degree(terms: &BTreeMap<i32, Term>, polynomial_degree: &
         }
     }
 
-    println!("Polynomial degree: {polynomial_degree}");
+    color("cyan", "Polynomial degree: ");
+    println!("{}\n", polynomial_degree);
 
     check_polynomial_degree(*polynomial_degree);
+
 }

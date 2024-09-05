@@ -1,18 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parsing.rs                                         :+:      :+:    :+:   */
+/*   split_equation.rs                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 20:56:03 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 10:01:19 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/05 15:12:37 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 use crate::error;
 
+
 fn character_position(string: &str, character: char) -> usize {
+
     // Return the position of the character in the string
     // If the character is not found, an error is raised
     // If the character is found multiple times, an error is raised
@@ -38,9 +41,12 @@ fn character_position(string: &str, character: char) -> usize {
         error("Error: Invalid equation, '=' sign at the beginning or the end of the equation");
     }
     position
+
 }
 
+
 pub fn split_equation(equation: &String) -> (&str, &str) {
+
     // Use the character_position function to find the position of the '=' sign
     // Slice the equation in two parts : left side and right side
     // The right side will be multiplied by -1
@@ -51,4 +57,5 @@ pub fn split_equation(equation: &String) -> (&str, &str) {
     let right_side: &str = &equation[equal_position + 1..];
 
     (left_side, right_side)
+
 }

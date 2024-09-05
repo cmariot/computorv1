@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:38:52 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 10:16:35 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/05 17:15:10 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ use print_reduced_form::print_reduced_form;
 
 mod print_polynomial_degree;
 use print_polynomial_degree::print_polynomial_degree;
+// use print_reduced_form::color;
 
 mod resolve;
 use resolve::resolve_degree_0;
@@ -36,11 +37,19 @@ use error::error;
 
 mod parsing_utils;
 
+mod print;
+use print::header;
+use print::color;
+
+
 pub fn run(equation: String) -> i8 {
+
     // Solve a polynomial equation of degree 0, 1 or 2
     // The equation must be passed as an argument
     // Example: cargo run "1 * X^0 + 1 * X^1 + 1 * X^2 = 0"
     // Find the X value(s) that satisfies the equation
+
+    header(equation.as_str());
 
     let (left_side, right_side) = split_equation(&equation);
     let mut terms: BTreeMap<i32, Term> = BTreeMap::new();
@@ -60,4 +69,5 @@ pub fn run(equation: String) -> i8 {
     }
 
     0
+
 }

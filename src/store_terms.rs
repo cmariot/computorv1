@@ -6,16 +6,18 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:04:00 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 00:07:31 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/05 18:20:04 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::error::error;
 use crate::parsing_utils::{contains, is_a_number, is_a_sign, is_multiplication_sign};
-use crate::Term;
+use crate::{term, Term};
 use std::collections::BTreeMap;
 
+
 fn parse_degree(string: &str) -> i32 {
+
     // Return the degree of the term
 
     if string == "X" {
@@ -31,7 +33,9 @@ fn parse_degree(string: &str) -> i32 {
         }
         degree.unwrap()
     }
+
 }
+
 
 fn insert_coefficient(
     terms: &mut BTreeMap<i32, Term>,
@@ -40,6 +44,7 @@ fn insert_coefficient(
     sign: &mut f64,
     side_sign: f64,
 ) {
+
     // Insert the Term in the BTreeMap or append the coefficient if
     // already present
 
@@ -47,16 +52,30 @@ fn insert_coefficient(
 
     if already_present.is_some() {
         let previous_term = already_present.unwrap();
+        if *coefficient == 0.0 {
+            let new_coefficient = previous_term.coefficient;
+            let new_term = Term::new(new_coefficient, *degree);
+            terms.insert(*degree, new_term);
+            return;
+        }
         let new_coefficient = previous_term.coefficient + *coefficient * *sign * side_sign;
         let new_term = Term::new(new_coefficient, *degree);
         terms.insert(*degree, new_term);
     } else {
+        if *coefficient == 0.0 {
+            let term = Term::new(0.0, *degree);
+            terms.insert(*degree, term);
+            return;
+        }
         let term = Term::new(*coefficient * *sign * side_sign, *degree);
         terms.insert(*degree, term);
     }
+
 }
 
+
 pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) {
+
     // Retrieve the sign, the coefficient and the degree of each polynomial part of an equation
     // Insert them in a BTreeMap
 
@@ -95,4 +114,5 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
         }
         i += 1;
     }
+
 }

@@ -6,14 +6,17 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:05:27 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 08:57:35 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/05 17:18:21 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::Term;
+
 use std::collections::BTreeMap;
+use crate::{color, print::exponent, Term};
+
 
 fn zero_equal_zero(terms: &BTreeMap<i32, Term>) -> bool {
+
     // Check if the reduced equation is 0 = 0
 
     for value in terms.values() {
@@ -22,9 +25,12 @@ fn zero_equal_zero(terms: &BTreeMap<i32, Term>) -> bool {
         }
     }
     true
+
 }
 
+
 fn print_sign(first_term: &mut bool, term: &Term) {
+
     // Print the sign of the coefficient
 
     if *first_term == false {
@@ -37,9 +43,12 @@ fn print_sign(first_term: &mut bool, term: &Term) {
         print!("-");
     }
     *first_term = false;
+
 }
 
+
 fn print_coefficient(term: &Term, abs_coefficient: f64) {
+
     // Print the coefficient of the term
 
     if term.degree == 0 {
@@ -47,25 +56,28 @@ fn print_coefficient(term: &Term, abs_coefficient: f64) {
     } else if abs_coefficient != 1.0 {
         print!("{} ", abs_coefficient);
     }
+
 }
 
+
 fn print_degree(degree: &i32, abs_coefficient: f64) {
+
     // Print the degree of the term
 
     if *degree != 0 {
         if abs_coefficient != 1.0 {
             print!("* ")
         }
-        print!("X^{}", *degree);
+        print!("{}", exponent(*degree));
+        // print!("X^{}", *degree);
     }
+
 }
 
 pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
-    // Print the reduced form of the equation
 
-    let blue = "\x1b[34m";
-    let reset = "\x1b[0m";
-    println!("{}Reduced form: {}{}", blue, reset, reset);
+    // Print the reduced form of the equation
+    color("cyan", "Reduced form: ");
 
     // Check if the reduced equation is 0 = 0
     if zero_equal_zero(terms) {
@@ -88,4 +100,5 @@ pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
         print_degree(degree, abs_coefficient);
     }
     println!(" = 0");
+
 }
