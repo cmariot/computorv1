@@ -1,0 +1,45 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'computorv1'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=computorv1",
+                    "--package=computorv1"
+                ],
+                "filter": {
+                    "name": "computorv1",
+                    "kind": "bin"
+                }
+            },
+            "args": ["2 * X^2 - X - 6 = 0"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'computorv1'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=computorv1",
+                    "--package=computorv1"
+                ],
+                "filter": {
+                    "name": "computorv1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
