@@ -21,6 +21,10 @@ pub fn exponent(nb: i32) -> String {
     if is_negative {
         copy *= -1;
     }
+    
+    if copy == 0 {
+        exponent.push('⁰')
+    }
 
     while copy > 0 {
 
@@ -28,9 +32,7 @@ pub fn exponent(nb: i32) -> String {
         copy /= 10;
 
         match digit {
-            0 => {
-                exponent.push('⁰')
-            },
+            0 => exponent.push('⁰'),
             1 => exponent.push('¹'),
             2 => exponent.push('²'),
             3 => exponent.push('³'),
