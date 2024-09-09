@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:05:27 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 17:18:21 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/06 15:05:42 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,17 +29,17 @@ fn zero_equal_zero(terms: &BTreeMap<i32, Term>) -> bool {
 }
 
 
-fn print_sign(first_term: &mut bool, term: &Term) {
+pub fn print_sign(first_term: &mut bool, coefficient: f64) {
 
     // Print the sign of the coefficient
 
     if *first_term == false {
-        if term.coefficient > 0.0 {
+        if coefficient > 0.0 {
             print!(" + ");
         } else {
             print!(" - ");
         }
-    } else if term.coefficient < 0.0 {
+    } else if coefficient < 0.0 {
         print!("-");
     }
     *first_term = false;
@@ -47,11 +47,11 @@ fn print_sign(first_term: &mut bool, term: &Term) {
 }
 
 
-fn print_coefficient(term: &Term, abs_coefficient: f64) {
+pub fn print_coefficient(degree: i32, abs_coefficient: f64) {
 
     // Print the coefficient of the term
 
-    if term.degree == 0 {
+    if degree == 0 {
         print!("{}", abs_coefficient);
     } else if abs_coefficient != 1.0 {
         print!("{} ", abs_coefficient);
@@ -60,16 +60,19 @@ fn print_coefficient(term: &Term, abs_coefficient: f64) {
 }
 
 
-fn print_degree(degree: &i32, abs_coefficient: f64) {
+pub fn print_degree(degree: &i32, abs_coefficient: f64) {
 
     // Print the degree of the term
 
     if *degree != 0 {
         if abs_coefficient != 1.0 {
-            print!("* ")
+            print!("× ");
         }
-        print!("{}", exponent(*degree));
-        // print!("X^{}", *degree);
+        if degree == &1 {
+            print!("X");
+        } else {
+            print!("{}", exponent(*degree));
+        }
     }
 
 }
@@ -77,17 +80,18 @@ fn print_degree(degree: &i32, abs_coefficient: f64) {
 pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
 
     // Print the reduced form of the equation
-    color("cyan", "Reduced form: ");
+    color("cyan", "\nReduced form: \n");
+    println!("We can simplify the equation to: ");
 
     // Check if the reduced equation is 0 = 0
     if zero_equal_zero(terms) {
-        println!("0 = 0");
+        println!("0 = 0\n");
         return;
     }
 
     // For each term, print the sign, the coefficient and the degree
     let mut first_term: bool = true;
-    for (degree, term) in terms.iter() {
+    for (degree, term) in terms.iter().rev() {
         // Skip the term with a coefficient of 0
         if term.coefficient == 0.0 {
             continue;
@@ -95,10 +99,10 @@ pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
 
         let abs_coefficient: f64 = term.coefficient.abs();
 
-        print_sign(&mut first_term, term);
-        print_coefficient(term, abs_coefficient);
+        print_sign(&mut first_term, term.coefficient);
+        print_coefficient(term.degree, abs_coefficient);
         print_degree(degree, abs_coefficient);
     }
-    println!(" = 0");
+    println!(" = 0\n");
 
 }

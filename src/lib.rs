@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:38:52 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 17:15:10 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/06 13:41:40 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,15 +41,17 @@ mod print;
 use print::header;
 use print::color;
 
+use std::io;
 
-pub fn run(equation: String) -> i8 {
+
+pub fn run(equation: String) -> Result<i8, io::Error> {
 
     // Solve a polynomial equation of degree 0, 1 or 2
     // The equation must be passed as an argument
     // Example: cargo run "1 * X^0 + 1 * X^1 + 1 * X^2 = 0"
     // Find the X value(s) that satisfies the equation
 
-    header(equation.as_str());
+    header();
 
     let (left_side, right_side) = split_equation(&equation);
     let mut terms: BTreeMap<i32, Term> = BTreeMap::new();
@@ -68,6 +70,6 @@ pub fn run(equation: String) -> i8 {
         _ => error("Error: Invalid polynomial degree"),
     }
 
-    0
+    Ok(0)
 
 }

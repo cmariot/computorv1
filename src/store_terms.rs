@@ -6,14 +6,15 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:04:00 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 18:20:04 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/06 16:29:18 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::error::error;
 use crate::parsing_utils::{contains, is_a_number, is_a_sign, is_multiplication_sign};
-use crate::{term, Term};
+use crate::Term;
 use std::collections::BTreeMap;
+use crate::print::color;
 
 
 fn parse_degree(string: &str) -> i32 {
@@ -43,6 +44,7 @@ fn insert_coefficient(
     coefficient: &mut f64,
     sign: &mut f64,
     side_sign: f64,
+    first_term: bool,
 ) {
 
     // Insert the Term in the BTreeMap or append the coefficient if
@@ -51,25 +53,43 @@ fn insert_coefficient(
     let already_present = terms.get(&degree);
 
     if already_present.is_some() {
-        let previous_term = already_present.unwrap();
+        let previous_term: &Term = already_present.unwrap();
         if *coefficient == 0.0 {
-            let new_coefficient = previous_term.coefficient;
-            let new_term = Term::new(new_coefficient, *degree);
+            let mut new_term = Term::new(0.0, *degree, first_term);
+            new_term.update_coefficient(previous_term.coefficient);
             terms.insert(*degree, new_term);
             return;
         }
-        let new_coefficient = previous_term.coefficient + *coefficient * *sign * side_sign;
-        let new_term = Term::new(new_coefficient, *degree);
+        let mut new_term: Term = Term::new(*coefficient * *sign, *degree, first_term);
+        new_term.update_coefficient(new_term.coefficient * side_sign + previous_term.coefficient);
         terms.insert(*degree, new_term);
     } else {
         if *coefficient == 0.0 {
-            let term = Term::new(0.0, *degree);
+            let term = Term::new(0.0, *degree, first_term);
             terms.insert(*degree, term);
             return;
         }
-        let term = Term::new(*coefficient * *sign * side_sign, *degree);
-        terms.insert(*degree, term);
+        if side_sign == -1.0 {
+            let mut term = Term::new(*coefficient * *sign, *degree, first_term);
+            term.update_coefficient(term.coefficient * side_sign);
+            terms.insert(*degree, term);
+        } else {
+            let term = Term::new(*coefficient * *sign * side_sign, *degree, first_term);
+            terms.insert(*degree, term);
+        }
     }
+
+}
+
+
+fn reset_vars(coefficient: &mut f64, degree: &mut i32, sign: &mut f64, first_term: &mut bool) {
+
+    // Reset the coefficient, the degree, the sign and the first_term variables
+
+    *coefficient = 1.0;
+    *degree = 0;
+    *sign = 1.0;
+    *first_term = false;
 
 }
 
@@ -86,10 +106,17 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
     let mut i: usize = 0;
     let side_splitted: std::str::SplitWhitespace<'_> = side.split_whitespace();
     let nb_terms: usize = side_splitted.count();
+    let mut first_term = true;
+
+    if side_sign == 1.0 {
+        color("cyan", "Equation:\n");
+        println!("Here is the equation given as input: ");
+    } else {
+        print!("{} ", " =");
+    }
 
     while i < nb_terms {
         let term: &str = side.split_whitespace().nth(i).unwrap();
-
         if is_a_sign(term) {
             sign = if term == "+" { 1.0 } else { -1.0 };
         } else if is_a_number(term) {
@@ -97,22 +124,24 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
             // If there is no term or the next term is a sign, the degree is 0
             if i + 1 == nb_terms || is_a_sign(side.split_whitespace().nth(i + 1).unwrap()) {
                 degree = 0;
-                insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign);
-                coefficient = 0.0;
-                sign = 1.0;
+                insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign, first_term);
+                reset_vars(&mut coefficient, &mut degree, &mut sign, &mut first_term);
             }
         } else if is_multiplication_sign(term) {
             i += 1;
             continue;
         } else if contains(term, 'X') {
             degree = parse_degree(term);
-            insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign);
-            coefficient = 1.0;
-            sign = 1.0;
+            insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign, first_term);
+            reset_vars(&mut coefficient, &mut degree, &mut sign, &mut first_term);
         } else {
             error(&format!("Error: Invalid term {term}"));
         }
         i += 1;
+    }
+
+    if side_sign == -1.0 {
+        println!();
     }
 
 }

@@ -6,11 +6,13 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:59:36 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 18:21:03 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/06 13:42:32 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 pub fn exponent(nb: i32) -> String {
+
     // Return the unicode string of the number passed in argument
     // example : 42 -> "⁴²"
 
@@ -45,13 +47,11 @@ pub fn exponent(nb: i32) -> String {
         }
     }
 
-
     if is_negative {
         exponent.push('⁻');
     }
 
     exponent.push('X');
-
 
     exponent = exponent.chars().rev().collect::<String>();
     exponent
@@ -84,19 +84,23 @@ pub fn color(color: &str, text: &str) {
 }
 
 
-pub fn header(equation: &str) {
+pub fn header() {
+
+    // Print the header of the program and an introduction
 
     color("cyan", "\n/* ************************************************************************** */\n");
     color("cyan", "/*                                                                            */\n");
     color("cyan", "/*  computorV1                                                                */\n");
-    color("cyan", "/*  Polynomial equation solver                                                */\n");
-    color("cyan", "/*  Find the X value(s) that satisfies the equation                           */\n");
+    color("cyan", "/*  Second degree polynomial equation solver                                  */\n");
     color("cyan", "/*                                                                            */\n");
     color("cyan", "/* ************************************************************************** */\n\n");
 
-    color("cyan", "Equation: ");
-    color("white", equation);
-    println!()
+    color("cyan", "Introduction:\n");
+    println!("An equation of the second degree is an equation of the following type:");
+    println!("a × X² + b × X + c = 0");
+    println!("Where a, b and c are real numbers and a ≠ 0.");
+    println!("This program will find the X value(s) that satisfies the equation.\n");
+
 
 }
 
