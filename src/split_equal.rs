@@ -1,20 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   split_equation.rs                                  :+:      :+:    :+:   */
+/*   split_equal.rs                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 20:56:03 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 15:12:37 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/09 15:40:19 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-use crate::error;
-
-
-fn character_position(string: &str, character: char) -> usize {
+fn character_position(string: &str, character: char) -> Result<usize, &'static str> {
 
     // Return the position of the character in the string
     // If the character is not found, an error is raised
@@ -30,32 +27,37 @@ fn character_position(string: &str, character: char) -> usize {
             count += 1;
             position = i;
             if count > 1 {
-                error("Error: Invalid equation, multiple '=' signs");
+                return Err("Error: Invalid equation, multiple '=' signs");
             }
         }
     }
 
     if count == 0 {
-        error("Error: Invalid equation, no '=' sign");
+        return Err("Error: Invalid equation, no '=' sign");
     } else if position == 0 || position == string.len() - 1 {
-        error("Error: Invalid equation, '=' sign at the beginning or the end of the equation");
+        return Err("Error: Invalid equation, '=' sign at the beginning or the end of the equation");
     }
-    position
+    Ok(position)
 
 }
 
 
-pub fn split_equation(equation: &String) -> (&str, &str) {
+pub fn split_equal(equation: &String) -> Result<(&str, &str), &'static str> {
 
     // Use the character_position function to find the position of the '=' sign
     // Slice the equation in two parts : left side and right side
     // The right side will be multiplied by -1
 
-    let equal_position = character_position(equation, '=');
+    let equal_position = match character_position(equation, '=') {
+        Ok(position) => position,
+        Err(error) => {
+            return Err(error);
+        }
+    };
 
     let left_side: &str = &equation[..equal_position];
     let right_side: &str = &equation[equal_position + 1..];
 
-    (left_side, right_side)
+    Ok((left_side, right_side))
 
 }

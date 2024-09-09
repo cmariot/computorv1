@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:04:00 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/06 16:29:18 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/09 12:11:17 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ fn reset_vars(coefficient: &mut f64, degree: &mut i32, sign: &mut f64, first_ter
 }
 
 
-pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) {
+pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) -> Result<bool, &'static str> {
 
     // Retrieve the sign, the coefficient and the degree of each polynomial part of an equation
     // Insert them in a BTreeMap
@@ -107,6 +107,7 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
     let side_splitted: std::str::SplitWhitespace<'_> = side.split_whitespace();
     let nb_terms: usize = side_splitted.count();
     let mut first_term = true;
+    let mut term_complete = false;
 
     if side_sign == 1.0 {
         color("cyan", "Equation:\n");
@@ -116,10 +117,15 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
     }
 
     while i < nb_terms {
+
         let term: &str = side.split_whitespace().nth(i).unwrap();
+
         if is_a_sign(term) {
+
             sign = if term == "+" { 1.0 } else { -1.0 };
+
         } else if is_a_number(term) {
+
             coefficient = term.parse::<f64>().unwrap();
             // If there is no term or the next term is a sign, the degree is 0
             if i + 1 == nb_terms || is_a_sign(side.split_whitespace().nth(i + 1).unwrap()) {
@@ -127,15 +133,22 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
                 insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign, first_term);
                 reset_vars(&mut coefficient, &mut degree, &mut sign, &mut first_term);
             }
+
         } else if is_multiplication_sign(term) {
+
             i += 1;
             continue;
+
         } else if contains(term, 'X') {
+
             degree = parse_degree(term);
             insert_coefficient(terms, &mut degree, &mut coefficient, &mut sign, side_sign, first_term);
             reset_vars(&mut coefficient, &mut degree, &mut sign, &mut first_term);
+
         } else {
-            error(&format!("Error: Invalid term {term}"));
+
+            return Err("Error: Invalid equation");
+            
         }
         i += 1;
     }
@@ -143,5 +156,7 @@ pub fn store_terms(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) 
     if side_sign == -1.0 {
         println!();
     }
+
+    return Ok(false)
 
 }

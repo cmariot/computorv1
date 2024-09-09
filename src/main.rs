@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 22:36:19 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/05 20:40:01 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/09 15:38:33 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,6 @@ use computorv1::run;
 use std::env;
 mod error;
 use error::error;
-
-
-// struct Arguments {
-//     program: String,
-//     equation: String
-// }
 
 
 pub fn parse_argument() -> String {
@@ -40,8 +34,8 @@ fn main() {
 
     let equation: String = parse_argument();
 
-    if let Err(_) = run(equation) {
-        error(&"Fatal error.");
+    if let Err(error_msg) = run(equation) {
+        error(error_msg);
     }
 
 }
