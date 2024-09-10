@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 22:12:38 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/06 14:07:47 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/10 09:55:28 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ pub struct Term {
     pub coefficient: f64,
     pub degree: i32,
     pub first_term: bool,
-    
+
 
 }
 
@@ -25,7 +25,7 @@ use crate::print_reduced_form::{print_sign, print_coefficient, print_degree};
 impl Term {
 
     // Associated function (no self argument)
-    pub fn new(coefficient: f64, degree: i32, first_term: bool) -> Term {
+    pub fn new(coefficient: f64, degree: i32, first_term: bool, print: bool) -> Term {
 
         // Create a new Term and print it
 
@@ -35,7 +35,9 @@ impl Term {
             first_term,
         };
 
-        term.print();
+        if print == true {
+            term.print();
+        }
 
         term
 

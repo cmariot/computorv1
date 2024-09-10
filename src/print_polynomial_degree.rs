@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:09:12 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/06 18:08:50 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/09 20:07:43 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,31 +32,38 @@ fn check_polynomial_degree(polynomial_degree: i32, negative_polynomial_degree: &
 
 }
 
-pub fn print_polynomial_degree(terms: &BTreeMap<i32, Term>, polynomial_degree: &mut i32) {
+pub fn get_polynomial_degree(terms: &BTreeMap<i32, Term>) -> i32 {
 
     // Set and print the polynomial degree
     // The polynomial degree is the highest degree of the terms in the equation
     // Example : 3 * X^2 + 1 * X^1 + 1 * X^0 = 0 -> Polynomial degree: 2
     // Also check if the degree is >= 0 and < 3
 
+    let mut polynomial_degree = 0;
+    let mut negative_polynomial_degree = false;
+
     color("cyan", "Polynomial degree:\n");
     println!("The polynomial degree is the highest degree of the terms in the equation");
     println!("Here are the terms of the equation:");
 
-    let mut negative_polynomial_degree = false;
-
     for (degree, term) in terms.iter().rev() {
-        if *degree > *polynomial_degree {
-            *polynomial_degree = *degree;
+
+        if *degree > polynomial_degree {
+            polynomial_degree = *degree;
         }
+
         println!("{} × {}", term.coefficient, exponent(*degree));
+
         if *degree < 0 {
             negative_polynomial_degree = true;
         }
+
     }
 
     println!("The polynomial degree is {}\n", polynomial_degree);
 
-    check_polynomial_degree(*polynomial_degree, &negative_polynomial_degree);
+    check_polynomial_degree(polynomial_degree, &negative_polynomial_degree);
+
+    polynomial_degree
 
 }

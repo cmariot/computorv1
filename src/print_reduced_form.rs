@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:05:27 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/06 15:05:42 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/09 20:08:18 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
     // For each term, print the sign, the coefficient and the degree
     let mut first_term: bool = true;
     for (degree, term) in terms.iter().rev() {
+
         // Skip the term with a coefficient of 0
         if term.coefficient == 0.0 {
             continue;
@@ -102,6 +103,7 @@ pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
         print_sign(&mut first_term, term.coefficient);
         print_coefficient(term.degree, abs_coefficient);
         print_degree(degree, abs_coefficient);
+
     }
     println!(" = 0\n");
 

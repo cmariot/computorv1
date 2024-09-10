@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:38:52 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/09 18:25:35 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/10 10:20:40 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,11 @@ use std::collections::BTreeMap;
 mod term;
 use term::Term;
 
-mod store_terms;
-use store_terms::store_terms;
-
 mod print_reduced_form;
 use print_reduced_form::print_reduced_form;
 
 mod print_polynomial_degree;
-use print_polynomial_degree::print_polynomial_degree;
-// use print_reduced_form::color;
+use print_polynomial_degree::get_polynomial_degree;
 
 mod resolve;
 use resolve::resolve_degree_0;
@@ -34,8 +30,6 @@ use resolve::resolve_degree_2;
 
 mod error;
 use error::error;
-
-mod parsing_utils;
 
 mod print;
 use print::header;
@@ -68,6 +62,107 @@ fn split_start_inclusive(str: &str, delimiters: &[char]) -> Result<Vec<String>, 
 }
 
 
+fn parse_term_sign(term: &String, i: &mut usize, coefficient: &mut f64) {
+    // Parse the sign of the coefficient
+    let mut sign = 1.0;
+    while *i < term.len() {
+        if term.chars().nth(*i).unwrap() == '-' {
+            sign *= -1.0;
+        } else if term.chars().nth(*i).unwrap() == '+' {
+            sign *= 1.0;
+        } else {
+            break;
+        }
+        *i += 1;
+    }
+    *coefficient *= sign;
+}
+
+
+fn parse_term_coefficient(term: &String, i: &mut usize, coefficient: &mut f64) -> Result<(), &'static str> {
+
+    let numeric_value_start = *i;
+    while *i < term.len() {
+        if term.chars().nth(*i).unwrap().is_numeric() || term.chars().nth(*i).unwrap() == '.' {
+            *i += 1;
+        } else {
+            break;
+        }
+    }
+    let numeric_value_end = *i;
+
+    if numeric_value_start == numeric_value_end && *i + 1 <= term.len() && term[*i..*i + 1].to_string() == "X" {
+        *coefficient = 1.0;
+        return Ok(());
+    }
+
+    *coefficient = match term[numeric_value_start..numeric_value_end].parse::<f64>() {
+        Ok(numeric_value) => *coefficient * numeric_value,
+        Err(_) => {return Err("Parsing error: Invalid numeric value");}
+    };
+
+    if *coefficient == -0.0 {
+        *coefficient = 0.0;
+    }
+
+    Ok(())
+}
+
+
+fn parse_degree(term: &String, i: &mut usize, terms: &mut BTreeMap<i32, f64>, coefficient: f64, degree: &mut i32) -> Result<(), &'static str> {
+
+    // Parse the '*X^1' part of the terms
+
+    let mut degree_part = term[*i..].to_string();
+
+    if degree_part.len() == 0 {
+        return Ok(());
+    }
+
+    // Skip '*' character if it is present and not at the end of the term
+    if degree_part.chars().nth(0).unwrap() == '*' {
+        *i += 1;
+        if *i == term.len() {
+            return Err("Parsing error: Unexpected end of term after '*'");
+        }
+    }
+
+    // Check if there is the 'X' part
+    degree_part = term[*i..].to_string();
+    if degree_part.chars().nth(0).unwrap() == 'X' {
+        *degree = 1;
+        *i += 1;
+        if *i == term.len() {
+            terms.insert(*degree, coefficient as f64);
+        return Ok(());
+    }
+    } else {
+        return Err("Parsing error: Invalid term, missing 'X'");
+    }
+
+    // Check if there is the '^' part
+    if term.chars().nth(*i).unwrap() != '^' {
+        return Err("Parsing error: Invalid term, missing '^'");
+    } else {
+        *i += 1;
+        if *i == term.len() {
+            return Err("Parsing error: Unexpected end of term after '^'");
+        }
+    }
+
+    // Parse the degree part
+    degree_part = term[*i..].to_string();
+    *degree = match degree_part.parse::<i32>() {
+        Ok(degree) => degree,
+        Err(_) => {
+            return Err("Parsing error: Invalid degree value");
+        }
+    };
+
+    Ok(())
+
+}
+
 
 fn store_polynomial(side: &str, sign: f64) -> Result<BTreeMap<i32, f64>, &'static str> {
 
@@ -82,6 +177,13 @@ fn store_polynomial(side: &str, sign: f64) -> Result<BTreeMap<i32, f64>, &'stati
         }
     };
 
+    if sign == 1.0 {
+    } else {
+        print!(" =");
+    }
+
+    let mut first_term= if sign == 1.0 {true} else {false};
+
     for term in terms_vector {
 
         // Check if a term is empty or contains only a sign
@@ -93,118 +195,68 @@ fn store_polynomial(side: &str, sign: f64) -> Result<BTreeMap<i32, f64>, &'stati
             return Err("Parsing error: Unexpected '-' sign");
         }
 
-        // Parse the sign of the coefficient
-        let mut coefficient = sign;
         let mut i = 0;
-        while i < term.len() {
-            if term.chars().nth(i).unwrap() == '-' {
-                coefficient *= -1.0;
-            } else if term.chars().nth(i).unwrap() == '+' {
-                coefficient *= 1.0;
-            } else {
-                break;
-            }
-            i += 1;
-        }
-
-        // Parse the numeric value of the coefficient
-        let numeric_value_start = i;
-        while i < term.len() {
-            if term.chars().nth(i).unwrap().is_numeric() || term.chars().nth(i).unwrap() == '.' {
-                i += 1;
-            } else {
-                break;
-            }
-        }
-        let numeric_value_end = i;
-        let coefficient = match term[numeric_value_start..numeric_value_end].parse::<f64>() {
-            Ok(numeric_value) => coefficient * numeric_value,
-            Err(_) => {
-                return Err("Parsing error: Invalid numeric value");
-            }
-        };
-
-        // Check if the coefficient is not 0
-        if coefficient == 0.0 {
-            continue;
-        }
-
+        let mut coefficient = sign;
         let mut degree = 0;
 
-        // Check if the term is a number
-        if i == term.len() {
-            println!("Term: {}", term);
-            println!("Coefficient: {}", coefficient);
-            println!();
-            terms.insert(degree, coefficient as f64);
-            continue;
-        }
+        parse_term_sign(&term, &mut i, &mut coefficient);
+        parse_term_coefficient(&term, &mut i, &mut coefficient, )?;
 
-        // Check if there is the '*X' part
-        let mut degree_part = term[i..].to_string();
-
-        // Skip '*' character if it is present
-        if degree_part.chars().nth(0).unwrap() == '*' {
-            i += 1;
-            if i == term.len() {
-                return Err("Parsing error: Unexpected end of term after '*'");
-            }
-        }
-
-        // Check if there is the 'X' part
-        degree_part = term[i..].to_string();
-        if degree_part.chars().nth(0).unwrap() != 'X' {
-
-            return Err("Parsing error: Invalid term, missing 'X'");
-        } else {
-            i += 1;
-        }
-
-        // Check if there is the '^' part
-        if i == term.len() {
-            degree = 0;
-            println!("Term: {}", term);
-            println!("Coefficient: {}", coefficient);
-            println!("Degree: {}", degree);
-            println!();
-            terms.insert(degree, coefficient as f64);
-
-            // store_terms(terms, &mut degree, &mut coefficient, 1.0, 1.0, true);
-
-            continue;
-        }
-        if term.chars().nth(i).unwrap() != '^' {
-            return Err("Parsing error: Invalid term, missing '^'");
-        } else {
-            i += 1;
-        }
-        if i == term.len() {
-            return Err("Parsing error: Unexpected end of term after '^'");
-        }
-
-        // Parse the degree part
-        degree_part = term[i..].to_string();
-        let degree = match degree_part.parse::<i32>() {
-            Ok(degree) => degree,
-            Err(_) => {
-                return Err("Parsing error: Invalid degree value");
+        let _ = match parse_degree(&term, &mut i, &mut terms, coefficient, &mut degree) {
+            Ok(()) => (),
+            Err(error) => {
+                return Err(error);
             }
         };
 
-        println!("Term: {}", term);
-        println!("Coefficient: {}", coefficient);
-        println!("Degree part: {}", degree_part);
-        println!("Degree: {}", degree);
-        println!();
-        terms.insert(degree, coefficient as f64);
+        // debug
+        println!("Term : {}", term);
+        println!("Coefficient : {}", coefficient);
+        println!("Degree : {}", degree);
 
-        // store_terms(terms, &mut degree, &mut coefficient, 1.0, 1.0, true);
+        let _term_to_print = Term::new(coefficient, degree, first_term, true);
+
+        println!("\n");
+
+        terms.insert(degree, coefficient as f64);
+        first_term = false;
 
     }
 
     Ok(terms)
+
 }
 
+fn join_terms(terms: &mut BTreeMap<i32, Term>, left_terms: &BTreeMap<i32, f64>, right_terms: &BTreeMap<i32, f64>) {
+
+    // Insert the right side terms in the left side terms
+
+    let side_terms = [left_terms, right_terms];
+    let mut first_term = true;
+
+    for side_term in side_terms {
+        for (degree, coefficient) in side_term.iter() {
+            if first_term {
+                first_term = false;
+            }
+
+            // Insert or append to the value if already present
+            if terms.contains_key(degree) {
+                println!("Degree {} is already present", degree);
+                let previous_term = terms.get(degree).unwrap();
+                let mut new_term = Term::new(*coefficient, *degree, first_term, false);
+                new_term.update_coefficient(previous_term.coefficient + *coefficient);
+                terms.insert(*degree, new_term);
+            } else {
+                println!("Degree {} is not present", degree);
+                terms.insert(*degree, Term::new(*coefficient, *degree, first_term, false));
+
+            }
+
+        }
+    }
+
+}
 
 fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, &'static str> {
 
@@ -216,6 +268,8 @@ fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, &'static str> {
             return Err(error);
         }
     };
+
+    color("cyan", "Equation parsing:\n");
 
     let left_terms = match store_polynomial(left_side, 1.0) {
         Ok(left_terms) => left_terms,
@@ -231,22 +285,9 @@ fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, &'static str> {
         }
     };
 
-    // Insert the right side terms in the left side terms
-    let mut first_term = true;
-    for (degree, coefficient) in right_terms.iter() {
-        let term = terms.entry(*degree).or_insert(Term::new(0.0, *degree, first_term));
-        if first_term {
-            first_term = false;
-        }
-        term.coefficient += *coefficient;
-    }
-    for (degree, coefficient) in left_terms.iter() {
-        let term = terms.entry(*degree).or_insert(Term::new(0.0, *degree, first_term));
-        if first_term {
-            first_term = false;
-        }
-        term.coefficient += *coefficient;
-    }
+    println!("\n");
+
+    join_terms(&mut terms, &left_terms, &right_terms);
 
     Ok(terms)
 
@@ -268,15 +309,9 @@ pub fn run(equation: String) -> Result<i8, &'static str> {
         }
     };
 
-    // let left_side_error = store_terms(&left_side, 1.0, &mut terms)?;
-    // let right_side_error = store_terms(&right_side, -1.0, &mut terms)?;
-    // if left_side_error || right_side_error {
-        // return Err("Error: Invalid equation");
-    // }
-
-    let mut polynomial_degree: i32 = 0;
     print_reduced_form(&terms);
-    print_polynomial_degree(&terms, &mut polynomial_degree);
+
+    let polynomial_degree: i32 = get_polynomial_degree(&terms);
 
     match polynomial_degree {
         0 => resolve_degree_0(&terms),
