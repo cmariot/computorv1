@@ -19,7 +19,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["2 * X^2 - X - 6 = 0"],
+            "args": ["5 + 4 * X + X^2= X^2"],
             "cwd": "${workspaceFolder}"
         },
         {

@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:38:52 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/10 10:20:40 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/10 14:48:17 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ fn parse_term_coefficient(term: &String, i: &mut usize, coefficient: &mut f64) -
 }
 
 
-fn parse_degree(term: &String, i: &mut usize, terms: &mut BTreeMap<i32, f64>, coefficient: f64, degree: &mut i32) -> Result<(), &'static str> {
+fn parse_degree(term: &String, i: &mut usize, coefficient: f64, degree: &mut i32) -> Result<(), &'static str> {
 
     // Parse the '*X^1' part of the terms
 
@@ -133,9 +133,9 @@ fn parse_degree(term: &String, i: &mut usize, terms: &mut BTreeMap<i32, f64>, co
         *degree = 1;
         *i += 1;
         if *i == term.len() {
-            terms.insert(*degree, coefficient as f64);
-        return Ok(());
-    }
+            // terms.insert(*degree, coefficient as f64);
+            return Ok(());
+        }
     } else {
         return Err("Parsing error: Invalid term, missing 'X'");
     }
@@ -163,10 +163,25 @@ fn parse_degree(term: &String, i: &mut usize, terms: &mut BTreeMap<i32, f64>, co
 
 }
 
+fn insert_term(terms: &mut BTreeMap<i32, Term>, coefficient: &f64, degree: &i32, sign: &f64, first_term: &bool) {
 
-fn store_polynomial(side: &str, sign: f64) -> Result<BTreeMap<i32, f64>, &'static str> {
+    // let mut term = Term::new(coefficient * sign, degree, first_term, true);
 
-    let mut terms = BTreeMap::new();
+    // Insert or append to the value if already present
+    if terms.contains_key(degree) {
+        let previous_term = terms.get(degree).unwrap();
+        let mut new_term = Term::new(*coefficient, *degree, *first_term, true);
+        new_term.update_coefficient(previous_term.coefficient + *coefficient);
+        terms.insert(*degree, new_term);
+    } else {
+        let term = Term::new(*coefficient, *degree, *first_term, true);
+        terms.insert(*degree, term);
+    }
+
+}
+
+fn store_polynomial(side: &str, sign: f64, terms: &mut BTreeMap<i32, Term>) -> Result<(), &'static str> {
+
     let cleaned_side = side.replace(" ", "");
     let delimiters = ['+', '-'];
 
@@ -177,12 +192,11 @@ fn store_polynomial(side: &str, sign: f64) -> Result<BTreeMap<i32, f64>, &'stati
         }
     };
 
-    if sign == 1.0 {
-    } else {
-        print!(" =");
+    if sign == -1.0 {
+        print!(" = ");
     }
 
-    let mut first_term= if sign == 1.0 {true} else {false};
+    let mut first_term = true;
 
     for term in terms_vector {
 
@@ -200,67 +214,33 @@ fn store_polynomial(side: &str, sign: f64) -> Result<BTreeMap<i32, f64>, &'stati
         let mut degree = 0;
 
         parse_term_sign(&term, &mut i, &mut coefficient);
-        parse_term_coefficient(&term, &mut i, &mut coefficient, )?;
+        parse_term_coefficient(&term, &mut i, &mut coefficient)?;
 
-        let _ = match parse_degree(&term, &mut i, &mut terms, coefficient, &mut degree) {
+        let _ = match parse_degree(&term, &mut i, coefficient, &mut degree) {
             Ok(()) => (),
             Err(error) => {
                 return Err(error);
             }
         };
 
-        // debug
-        println!("Term : {}", term);
-        println!("Coefficient : {}", coefficient);
-        println!("Degree : {}", degree);
+        // Debug
+        println!("Coefficient: {}", coefficient);
+        println!("Degree: {}", degree);
+        println!("Sign: {}", sign);
+        println!("First term: {}", first_term);
 
-        let _term_to_print = Term::new(coefficient, degree, first_term, true);
+        insert_term(terms, &coefficient, &degree, &sign, &first_term);
 
         println!("\n");
 
-        terms.insert(degree, coefficient as f64);
         first_term = false;
-
     }
 
-    Ok(terms)
-
-}
-
-fn join_terms(terms: &mut BTreeMap<i32, Term>, left_terms: &BTreeMap<i32, f64>, right_terms: &BTreeMap<i32, f64>) {
-
-    // Insert the right side terms in the left side terms
-
-    let side_terms = [left_terms, right_terms];
-    let mut first_term = true;
-
-    for side_term in side_terms {
-        for (degree, coefficient) in side_term.iter() {
-            if first_term {
-                first_term = false;
-            }
-
-            // Insert or append to the value if already present
-            if terms.contains_key(degree) {
-                println!("Degree {} is already present", degree);
-                let previous_term = terms.get(degree).unwrap();
-                let mut new_term = Term::new(*coefficient, *degree, first_term, false);
-                new_term.update_coefficient(previous_term.coefficient + *coefficient);
-                terms.insert(*degree, new_term);
-            } else {
-                println!("Degree {} is not present", degree);
-                terms.insert(*degree, Term::new(*coefficient, *degree, first_term, false));
-
-            }
-
-        }
-    }
+    Ok(())
 
 }
 
 fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, &'static str> {
-
-    let mut terms: BTreeMap<i32, Term> = BTreeMap::new();
 
     let (left_side, right_side) = match split_equal(&equation) {
         Ok((left_side, right_side)) => (left_side, right_side),
@@ -270,24 +250,14 @@ fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, &'static str> {
     };
 
     color("cyan", "Equation parsing:\n");
+    println!("The equation is: {}", equation);
 
-    let left_terms = match store_polynomial(left_side, 1.0) {
-        Ok(left_terms) => left_terms,
-        Err(error) => {
-            return Err(error);
-        }
-    };
-
-    let right_terms = match store_polynomial(right_side, -1.0) {
-        Ok(right_terms) => right_terms,
-        Err(error) => {
-            return Err(error);
-        }
-    };
+    let mut terms: BTreeMap<i32, Term> = BTreeMap::new();
+    store_polynomial(left_side, 1.0, &mut terms)?;
+    store_polynomial(right_side, -1.0, &mut terms)?;
 
     println!("\n");
-
-    join_terms(&mut terms, &left_terms, &right_terms);
+    // join_terms(&mut terms, &left_terms, &right_terms);
 
     Ok(terms)
 
