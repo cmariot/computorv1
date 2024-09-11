@@ -6,9 +6,11 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:59:36 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/10 18:25:23 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 13:31:42 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+use core::num;
 
 
 pub fn exponent(nb: i32) -> String {
@@ -102,4 +104,5 @@ pub fn header() {
     println!("This program will find the X value(s) that satisfies the equation.\n");
 
 }
+
 

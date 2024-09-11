@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:38:52 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/10 18:26:26 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 11:36:10 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,16 @@ use print_reduced_form::print_reduced_form;
 mod print_polynomial_degree;
 use print_polynomial_degree::get_polynomial_degree;
 
-mod resolve;
-use resolve::resolve_degree_0;
-use resolve::resolve_degree_1;
-use resolve::resolve_degree_2;
+mod get_coefficient;
+
+mod solve_degree_0;
+use solve_degree_0::solve_degree_0;
+
+mod solve_degree_1;
+use solve_degree_1::solve_degree_1;
+
+mod solve_degree_2;
+use solve_degree_2::solve_degree_2;
 
 mod error;
 use error::error;
@@ -46,6 +52,8 @@ mod parse_coefficient;
 mod parse_degree;
 
 mod split_equal;
+
+mod irreducible_fraction;
 
 
 pub fn run(equation: String) -> Result<i8, &'static str> {
@@ -69,9 +77,9 @@ pub fn run(equation: String) -> Result<i8, &'static str> {
     let polynomial_degree: i32 = get_polynomial_degree(&terms);
 
     match polynomial_degree {
-        0 => resolve_degree_0(&terms),
-        1 => resolve_degree_1(&terms),
-        2 => resolve_degree_2(&terms),
+        0 => solve_degree_0(&terms),
+        1 => solve_degree_1(&terms),
+        2 => solve_degree_2(&terms),
         _ => error("Error: Invalid polynomial degree"),
     }
 

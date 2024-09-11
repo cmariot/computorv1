@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:09:12 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 10:15:24 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 14:17:34 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ pub fn get_polynomial_degree(terms: &BTreeMap<i32, Term>) -> i32 {
     let mut negative_polynomial_degree = false;
 
     polynomial_degree_header();
+
     for (degree, term) in terms.iter().rev() {
 
         if *degree > polynomial_degree {
@@ -68,6 +69,7 @@ pub fn get_polynomial_degree(terms: &BTreeMap<i32, Term>) -> i32 {
         }
 
     }
+
     polynomial_degree_footer(polynomial_degree);
     check_polynomial_degree(polynomial_degree, &negative_polynomial_degree);
     polynomial_degree

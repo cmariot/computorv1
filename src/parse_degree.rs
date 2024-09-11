@@ -6,9 +6,28 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:26:12 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 10:05:05 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 13:26:42 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
+fn no_X(degree_part: &String) -> bool {
+
+    // Return true if the term is 'X' without a degree
+    // Example : 3 * X, 1 * X ...
+
+    return degree_part.len() == 0;
+
+}
+
+fn no_degree(degree_part: &String) -> bool {
+
+    // Return true if the term is 'X' without a degree
+    // Example : 3 * X, 1 * X ...
+
+    return degree_part.len() == 0;
+
+}
 
 
 pub fn parse_degree(term: &String, i: &mut usize, degree: &mut i32) -> Result<(), &'static str> {
@@ -17,7 +36,7 @@ pub fn parse_degree(term: &String, i: &mut usize, degree: &mut i32) -> Result<()
 
     let mut degree_part = term[*i..].to_string();
 
-    if degree_part.len() == 0 {
+    if no_X(&degree_part) {
         return Ok(());
     }
 
