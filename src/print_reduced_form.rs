@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:05:27 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/09 20:08:18 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 10:12:53 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ pub fn print_degree(degree: &i32, abs_coefficient: f64) {
 pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
 
     // Print the reduced form of the equation
-    color("cyan", "\nReduced form: \n");
+    color("cyan", "Reduced form: \n");
     println!("We can simplify the equation to: ");
 
     // Check if the reduced equation is 0 = 0
@@ -93,7 +93,6 @@ pub fn print_reduced_form(terms: &BTreeMap<i32, Term>) {
     let mut first_term: bool = true;
     for (degree, term) in terms.iter().rev() {
 
-        // Skip the term with a coefficient of 0
         if term.coefficient == 0.0 {
             continue;
         }

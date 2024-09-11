@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:59:36 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/06 13:42:32 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/10 18:25:23 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,6 @@ pub fn header() {
     println!("a × X² + b × X + c = 0");
     println!("Where a, b and c are real numbers and a ≠ 0.");
     println!("This program will find the X value(s) that satisfies the equation.\n");
-
 
 }
 
