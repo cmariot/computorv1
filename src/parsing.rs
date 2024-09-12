@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:25:51 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 09:58:03 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:34:55 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ fn parsing_footer() {
 }
 
 
-pub fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, &'static str> {
+pub fn parsing(equation: String) -> Result<BTreeMap<i32, Term>, String> {
 
     let mut terms: BTreeMap<i32, Term> = BTreeMap::new();
 

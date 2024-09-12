@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 17:59:57 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 10:03:02 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:35:50 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ fn no_coefficient(index_start: &usize, index_end: &usize, i: &usize, term: &Stri
 }
 
 
-pub fn parse_coefficient(term: &String, i: &mut usize, coefficient: &mut f64) -> Result<(), &'static str> {
+pub fn parse_coefficient(term: &String, i: &mut usize, coefficient: &mut f64) -> Result<(), String> {
 
     // The coefficient is the numeric value before the 'X' part of the term
 
@@ -48,7 +48,7 @@ pub fn parse_coefficient(term: &String, i: &mut usize, coefficient: &mut f64) ->
 
     *coefficient *= match term[index_start..index_end].parse::<f64>() {
         Ok(numeric_value) => numeric_value,
-        Err(_) => {return Err("Parsing error: Invalid numeric value in the coefficient");}
+        Err(_) => {return Err("Parsing error: Invalid numeric value in the coefficient".to_string());}
     };
 
     Ok(())

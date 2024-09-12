@@ -6,12 +6,12 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 20:56:03 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/09 15:40:19 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:37:50 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-fn character_position(string: &str, character: char) -> Result<usize, &'static str> {
+fn character_position(string: &str, character: char) -> Result<usize, String> {
 
     // Return the position of the character in the string
     // If the character is not found, an error is raised
@@ -27,22 +27,22 @@ fn character_position(string: &str, character: char) -> Result<usize, &'static s
             count += 1;
             position = i;
             if count > 1 {
-                return Err("Error: Invalid equation, multiple '=' signs");
+                return Err("Error: Invalid equation, multiple '=' signs".to_string());
             }
         }
     }
 
     if count == 0 {
-        return Err("Error: Invalid equation, no '=' sign");
+        return Err("Error: Invalid equation, no '=' sign".to_string());
     } else if position == 0 || position == string.len() - 1 {
-        return Err("Error: Invalid equation, '=' sign at the beginning or the end of the equation");
+        return Err("Error: Invalid equation, '=' sign at the beginning or the end of the equation".to_string());
     }
     Ok(position)
 
 }
 
 
-pub fn split_equal(equation: &String) -> Result<(&str, &str), &'static str> {
+pub fn split_equal(equation: &String) -> Result<(&str, &str), String> {
 
     // Use the character_position function to find the position of the '=' sign
     // Slice the equation in two parts : left side and right side

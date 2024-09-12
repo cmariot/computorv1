@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:05:58 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 10:05:41 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:38:02 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@ use crate::parse_coefficient::parse_coefficient;
 use crate::parse_degree::parse_degree;
 
 
-fn parse_term(term: &String, sign: &mut f64, coefficient: &mut f64, degree: &mut i32) -> Result<(), &'static str> {
+fn parse_term(term: &String, sign: &mut f64, coefficient: &mut f64, degree: &mut i32) -> Result<(), String> {
 
     let mut i = 0;
 
     if term.is_empty() {
-        return Err("Parsing error: Unexpected empty term");
+        return Err("Parsing error: Unexpected empty term".to_string());
     }
     else if let Err(error_msg) = parse_sign(&term, &mut i, sign) {
         return Err(error_msg);
@@ -43,7 +43,7 @@ fn parse_term(term: &String, sign: &mut f64, coefficient: &mut f64, degree: &mut
 }
 
 
-pub fn store_polynomial(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) -> Result<(), &'static str> {
+pub fn store_polynomial(side: &str, side_sign: f64, terms: &mut BTreeMap<i32, Term>) -> Result<(), String> {
 
     let cleaned_side = replace_whitespace(&mut side.to_string(), "".to_string());
     let terms_vector = split_equation_terms(&cleaned_side, &['+', '-']);

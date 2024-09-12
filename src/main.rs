@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/02 22:36:19 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 09:12:45 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:34:25 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ pub fn parse_argument() -> String {
 
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        error("Error: Invalid number of arguments");
+        error("Error: Invalid number of arguments".to_string());
     }
     args[1].trim().to_string()
 

@@ -6,7 +6,7 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 21:09:12 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 14:17:34 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:37:24 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@ fn check_polynomial_degree(polynomial_degree: i32, negative_polynomial_degree: &
     // Check if the polynomial degree is valid (between 0 and 2)
 
     if polynomial_degree < 0 {
-        error("The polynomial degree is negative, I can't solve.");
+        error("The polynomial degree is negative, I can't solve.".to_string());
     } else if polynomial_degree > 2 {
-        error("The polynomial degree is stricly greater than 2, I can't solve.");
+        error("The polynomial degree is stricly greater than 2, I can't solve.".to_string());
     } else if *negative_polynomial_degree {
-        error("An equation degree is negative, I can't solve.");
+        error("An equation degree is negative, I can't solve.".to_string());
     }
 
 }

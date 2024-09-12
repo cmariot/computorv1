@@ -6,78 +6,114 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:26:12 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 13:26:42 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/12 08:38:32 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-fn no_X(degree_part: &String) -> bool {
+fn no_degree_part(term: &String, i: &mut usize) -> bool {
 
     // Return true if the term is 'X' without a degree
     // Example : 3 * X, 1 * X ...
 
-    return degree_part.len() == 0;
-
-}
-
-fn no_degree(degree_part: &String) -> bool {
-
-    // Return true if the term is 'X' without a degree
-    // Example : 3 * X, 1 * X ...
-
-    return degree_part.len() == 0;
+    return term[*i..].len() == 0;
 
 }
 
 
-pub fn parse_degree(term: &String, i: &mut usize, degree: &mut i32) -> Result<(), &'static str> {
-
-    // Parse the '*X^1' part of the terms
-
-    let mut degree_part = term[*i..].to_string();
-
-    if no_X(&degree_part) {
-        return Ok(());
-    }
+fn skip_star(term: &String, i: &mut usize) -> Result<i32, String> {
 
     // Skip '*' character if it is present and not at the end of the term
-    if degree_part.chars().nth(0).unwrap() == '*' {
+
+    if term.chars().nth(*i).unwrap() == '*' {
         *i += 1;
         if *i == term.len() {
-            return Err("Parsing error: Unexpected end of term after '*'");
+            return Err("Parsing error: Unexpected end of term after '*'".to_string());
         }
     }
+    Ok(0)
+}
+
+
+fn check_x(term: &String, i: &mut usize, degree: &mut i32) -> Result<i8, String> {
 
     // Check if there is the 'X' part
-    degree_part = term[*i..].to_string();
-    if degree_part.chars().nth(0).unwrap() == 'X' {
-        *degree = 1;
+
+    if term.chars().nth(*i).unwrap() == 'X' {
         *i += 1;
         if *i == term.len() {
-            return Ok(());
+            *degree = 1;
+            return Ok(0);
         }
     } else {
-        return Err("Parsing error: Invalid term, missing 'X'");
+        return Err("Parsing error: Invalid term, missing 'X'".to_string());
     }
+    Ok(42)
+
+}
+
+fn check_exponent(term: &String, i: &mut usize) -> Result<(), String> {
 
     // Check if there is the '^' part
+
     if term.chars().nth(*i).unwrap() != '^' {
-        return Err("Parsing error: Invalid term, missing '^'");
+        return Err(format!("Parsing error: Invalid character after 'X' in the term {term}").to_string());
     } else {
         *i += 1;
         if *i == term.len() {
-            return Err("Parsing error: Unexpected end of term after '^'");
+            return Err(format!("Parsing error: Invalid character after '^' in the term {term}").to_string());
         }
     }
 
-    // Parse the degree part
-    degree_part = term[*i..].to_string();
+    Ok(())
+}
+
+
+fn parse_exponent_degree(term: &String, i: &mut usize, degree: &mut i32) -> Result<(), String> {
+
+    // Parse the exponent part of the term
+
+    let degree_part = term[*i..].to_string();
+
     *degree = match degree_part.parse::<i32>() {
         Ok(degree) => degree,
         Err(_) => {
-            return Err("Parsing error: Invalid degree value");
+            return Err("Parsing error: Invalid degree value".to_string());
         }
     };
+
+    Ok(())
+
+}
+
+
+pub fn parse_degree(term: &String, i: &mut usize, degree: &mut i32) -> Result<(), String> {
+
+    // Parse the "* X^1" part of the terms
+
+    if no_degree_part(term, i) {
+        return Ok(());
+    }
+    if let Err(e) = skip_star(term, i) {
+        return Err(e);
+    }
+
+    let x_ret = check_x(term, i, degree);
+    if let Err(e) = x_ret {
+        return Err(e);
+    } else {
+        let x_ret = x_ret.unwrap();
+        if x_ret == 0 {
+            return Ok(());
+        }
+    }
+
+    if let Err(e) = check_exponent(term, i) {
+        return Err(e);
+    }
+    if let Err(e) = parse_exponent_degree(term, i, degree) {
+        return Err(e);
+    }
 
     Ok(())
 

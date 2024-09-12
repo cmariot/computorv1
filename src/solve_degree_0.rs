@@ -1,3 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   solve_degree_0.rs                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/12 08:58:53 by cmariot           #+#    #+#             */
+/*   Updated: 2024/09/12 08:58:56 by cmariot          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
 use crate::{color, Term};
 use std::collections::BTreeMap;
 use crate::get_coefficient::get_coefficient_in_terms;

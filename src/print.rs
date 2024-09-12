@@ -6,11 +6,9 @@
 /*   By: cmariot <cmariot@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:59:36 by cmariot           #+#    #+#             */
-/*   Updated: 2024/09/11 13:31:42 by cmariot          ###   ########.fr       */
+/*   Updated: 2024/09/11 17:41:11 by cmariot          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-use core::num;
 
 
 pub fn exponent(nb: i32) -> String {
