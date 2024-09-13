@@ -14,19 +14,16 @@
 NAME = computorv1
 
 
-# Build and run the executable
-run:
-	cargo run -- "2 * X^2 + 1 * X^1 = 5 * X^0"
+# Build the project with optimisations
+$(NAME): build
+	cargo build --release
+	cp target/release/$(NAME) $(NAME)
 
 
 # Build the project
 build:
 	cargo build
-
-
-# Build the project with optimisations
-opti:
-	cargo build --release
+	cp target/debug/$(NAME) $(NAME)
 
 
 # Build a project without producing a binary to check for errors
@@ -38,6 +35,11 @@ check:
 clean:
 	cargo clean
 
-# Launch unit tests
-test:
-	cargo test -- --show-output --test integration_test
+
+# Remove the target directory and the binary
+fclean: clean
+	rm -f $(NAME)
+
+
+# Remove the target directory and the binary and rebuild the project
+re: fclean $(NAME)
